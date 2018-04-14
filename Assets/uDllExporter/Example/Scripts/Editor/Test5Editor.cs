@@ -4,12 +4,12 @@ using UnityEditor;
 namespace uDllExporter
 {
 
-[CustomEditor(typeof(Test2))]
-public class Test2Editor : Editor 
+[CustomEditor(typeof(Test5))]
+public class Test5Editor : Editor 
 {
 	public override void OnInspectorGUI() 
 	{
-		EditorGUILayout.LabelField("Test2");
+		EditorGUILayout.LabelField("Test5");
 		base.OnInspectorGUI();
 	}
 }
