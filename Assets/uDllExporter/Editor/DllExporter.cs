@@ -75,7 +75,11 @@ public class DllExporter : ScriptableWizard
 		{
 			var appPath = System.Environment.GetCommandLineArgs()[0];
 			var appDir = Path.GetDirectoryName(appPath);
+#if UNITY_EDITOR_WIN
+			return appDir + "/Data/";
+#else
 			return appDir + "/../";
+#endif
 		}
 	}
 
@@ -96,7 +100,11 @@ public class DllExporter : ScriptableWizard
 
 	static string smcsPath
 	{
+#if UNITY_EDITOR_WIN
+		get	{ return unityEditorPath + "Mono/bin/smcs.bat"; }
+#else
 		get	{ return unityEditorPath + "Mono/bin/smcs"; }
+#endif
 	}
 
     [MenuItem("Window/uDllExporter")]
@@ -237,6 +245,7 @@ public class DllExporter : ScriptableWizard
 			process.StartInfo.Arguments = GetArguments(files, dlls);
 			process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardError = true;         
+			process.StartInfo.CreateNoWindow = true;
             process.StartInfo.UseShellExecute = false; 
 			process.Start();
 
@@ -306,7 +315,9 @@ public class DllExporter : ScriptableWizard
 
 	bool IsEditorScript(string path)
 	{
-		return path.IndexOf("/Editor/") != -1;
+		return 
+            path.IndexOf("/Editor/") != -1 ||
+            path.IndexOf("\\Editor\\") != -1;
 	}
 	
 	List<string> GetSelectedFilePaths()
