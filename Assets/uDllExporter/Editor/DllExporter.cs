@@ -24,7 +24,6 @@ SOFTWARE.
 
 using UnityEngine;
 using UnityEditor;
-using UnityEditor.IMGUI.Controls;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,20 +31,11 @@ using System.Linq;
 namespace uDllExporter
 {
 
-public class ExportFilesTreeView : TreeView
-{
-    public ExportFilesTreeView(TreeViewState state) : base(state)
-    {
-    }
-
-    protected override TreeViewItem BuildRoot()
-    {
-        throw new System.NotImplementedException();
-    }
-}
-
 public class DllExporter : ScriptableWizard
 {
+	const string BuildErrorMessage = "Build Error (see Consele output).";
+	const string UnknownErrorMessage =  "Export Error (Please report the error message to uDllExporter developer).";
+
 	public enum TargetDirectory
 	{
 		All,
@@ -75,7 +65,9 @@ public class DllExporter : ScriptableWizard
 	int unityEditorDllListFlags = 1;
 	int otherDllListFlags = 0;
 
-	ExportFilesTreeView tree;
+	List<string> files = null;
+	Vector2 filesScrollPos = Vector2.zero;
+	string outputInfo;
 
 	static string unityEditorPath
 	{
@@ -184,15 +176,32 @@ public class DllExporter : ScriptableWizard
 
 		EditorGUILayout.Space();
 
-		EditorGUILayout.LabelField("Log", EditorStyles.boldLabel);
-
-		++EditorGUI.indentLevel;
+		if (files != null)
 		{
-			EditorGUILayout.TextArea(log);
-			EditorGUILayout.TagField("hoge,fuga,piyo");
+			EditorGUILayout.LabelField("Exported Files", EditorStyles.boldLabel);
+			++EditorGUI.indentLevel;
+			{
+				filesScrollPos = EditorGUILayout.BeginScrollView(filesScrollPos);
+				var assetsPathLength = Application.dataPath.Length + 1;
+				foreach (var file in files)
+				{
+					EditorGUILayout.LabelField(file.Substring(assetsPathLength));
+				}
+				EditorGUILayout.EndScrollView();
+			}
+			--EditorGUI.indentLevel;
 		}
-		--EditorGUI.indentLevel;
+
+		if (!string.IsNullOrEmpty(outputInfo))
+		{
+			EditorGUILayout.LabelField("Output", EditorStyles.boldLabel);
+			++EditorGUI.indentLevel;
+			EditorGUILayout.LabelField(outputInfo);
+			--EditorGUI.indentLevel;
+		}
 		
+		EditorGUILayout.Space();
+
 		return true;
 	}
 
@@ -220,9 +229,12 @@ public class DllExporter : ScriptableWizard
 
 		try
 		{
+			files = GetSelectedFilePaths();
+			var dlls = GetSelectedDllPaths();
+
 			var process = new System.Diagnostics.Process();
 			process.StartInfo.FileName = smcsPath;
-			process.StartInfo.Arguments = GetArguments();
+			process.StartInfo.Arguments = GetArguments(files, dlls);
 			process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardError = true;         
             process.StartInfo.UseShellExecute = false; 
@@ -244,7 +256,7 @@ public class DllExporter : ScriptableWizard
 				if (stderr.IndexOf(": error") != -1 || stderr.IndexOf("Exception:") != -1)
 				{
 					Debug.LogError(stderr);
-					errorString = "Build Error (see Consele output).";
+					errorString = BuildErrorMessage;
 				}
 				else
 				{
@@ -256,12 +268,24 @@ public class DllExporter : ScriptableWizard
 		{
 			Debug.LogError(e.Message);
 			Debug.LogError(e.StackTrace);
-			errorString = "Export Error (Please report the error message to uDllExporter developer).";
+			errorString = UnknownErrorMessage;
 		}
 
 		if (string.IsNullOrEmpty(errorString))
 		{
-			Debug.Log(string.Format("Exported: <b>{0}{1}.dll</b>", outputDirectoryPath, outputDllName));
+			var path = string.Format("{0}/{1}", outputDirectoryPath, outputDllName);
+			if (!File.Exists(path))
+			{
+				errorString = UnknownErrorMessage;
+			}
+			else
+			{
+				var outputDllSize = new FileInfo(path).Length;
+				outputInfo = string.Format("{0}/{1}.dll ({2} byte)", 
+					outputDirectoryPath, 
+					outputDllName,
+					outputDllSize);
+			}
 		}
 	}
 
@@ -347,13 +371,13 @@ public class DllExporter : ScriptableWizard
 		return list;
 	}
 
-	string GetArguments()
+	string GetArguments(List<string> files, List<string> dlls)
 	{
 		var arguments = "";
-		arguments += string.Join(" ", GetSelectedDllPaths().Select(x => string.Format("-r:\"{0}\" ", x)));
+		arguments += string.Join(" ", dlls.Select(x => string.Format("-r:\"{0}\" ", x)));
 		arguments += "-target:library ";
 		arguments += string.Format("-out:\"{0}/{1}\"", outputDirectoryPath, outputDllName);
-		arguments += " " + string.Join(" ", GetSelectedFilePaths().Select(x => string.Format("\"{0}\"", x)));
+		arguments += " " + string.Join(" ", files.Select(x => string.Format("\"{0}\"", x)));
 
 		Debug.Log(arguments);
 
