@@ -302,7 +302,7 @@ public class DllExporter : ScriptableWizard
 	{
 		if (Directory.Exists(path))
 		{
-			foreach (var dir in Directory.EnumerateFiles(path, "*.cs", SearchOption.AllDirectories))
+			foreach (var dir in Directory.GetFiles(path, "*.cs", SearchOption.AllDirectories))
 			{
 				GetFilesRecursively(Path.GetFullPath(dir), ref list);
 			}
@@ -349,8 +349,7 @@ public class DllExporter : ScriptableWizard
 	{
 		var list = new List<string>();
 
-		var dllPaths = Directory.EnumerateFiles(unityExtensionsDirPath, "*.dll", SearchOption.AllDirectories);
-		foreach (var path in dllPaths)
+		foreach (var path in Directory.GetFiles(unityExtensionsDirPath, "*.dll", SearchOption.AllDirectories))
 		{
 			list.Add(path);
 		}
@@ -385,10 +384,10 @@ public class DllExporter : ScriptableWizard
 	string GetArguments(List<string> files, List<string> dlls)
 	{
 		var arguments = "";
-		arguments += string.Join(" ", dlls.Select(x => string.Format("-r:\"{0}\" ", x)));
+		arguments += string.Join(" ", dlls.Select(x => string.Format("-r:\"{0}\" ", x)).ToArray());
 		arguments += "-target:library ";
 		arguments += string.Format("-out:\"{0}/{1}\"", outputDirectoryPath, outputDllName);
-		arguments += " " + string.Join(" ", files.Select(x => string.Format("\"{0}\"", x)));
+		arguments += " " + string.Join(" ", files.Select(x => string.Format("\"{0}\"", x)).ToArray());
 
 		Debug.Log(arguments);
 
