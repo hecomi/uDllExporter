@@ -579,9 +579,9 @@ PlayerSettings:
   incrementalIl2cppBuild: {}
   allowUnsafeCode: 0
   additionalIl2CppArgs: 
-  scriptingRuntimeVersion: 0
+  scriptingRuntimeVersion: 1
   apiCompatibilityLevelPerPlatform:
-    Standalone: 3
+    Standalone: 1
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
   metroPackageName: Template_3D
@@ -660,7 +660,7 @@ PlayerSettings:
   cloudServicesEnabled:
     UNet: 1
   facebookSdkVersion: 7.9.4
-  apiCompatibilityLevel: 3
+  apiCompatibilityLevel: 2
   cloudProjectId: 554bf090-a632-45c3-af8f-152945de3518
   projectName: uDllExporter
   organizationId: hecomi
