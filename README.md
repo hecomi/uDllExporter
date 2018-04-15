@@ -3,6 +3,17 @@ uDllExporter
 
 uDllExporter is a tool to build DLLs in Unity.
 
+How to use
+==========
+
+![UI](https://raw.githubusercontent.com/wiki/hecomi/uDllExporter/ui.png)
+
+1. Open uDllExporter window from **Window > uDllExporter**.
+2. Select sources or directories which you want to includes into your DLL from Project window.
+3. Input **Output Directory Path** and **Output DLL Name**.
+4. Select DLLs which you want add as references from **\* DLLs** select boxes.
+5. Press **Build DLL** button.
+
 License
 =======
 
