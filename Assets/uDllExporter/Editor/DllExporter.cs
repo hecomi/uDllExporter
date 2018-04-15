@@ -290,7 +290,7 @@ public class DllExporter : ScriptableWizard
 			else
 			{
 				var outputDllSize = new FileInfo(path).Length;
-				outputInfo = string.Format("{0}/{1}.dll ({2} byte)", 
+				outputInfo = string.Format("{0}/{1} ({2} byte)", 
 					outputDirectoryPath, 
 					outputDllName,
 					outputDllSize);
