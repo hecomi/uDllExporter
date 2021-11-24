@@ -3,6 +3,8 @@ uDllExporter
 
 uDllExporter is a tool to build DLLs in Unity.
 
+**This editor extension will not work with Unity version after 2019.2 for now.**
+
 How to use
 ==========
 
